@@ -25,7 +25,7 @@ volatile uint32_t indice = 0;
 
 void setup()
 {
-  Serial.begin(115200);
+  Serial.begin(921600);
   Serial.printf("Sampler %d campioni con ISR\n", BUFFER_LENGTH);
 
   // impiego il timer hardware numero 0, con prescaler 80 (Tbit = 1us), conteggio in avanti
