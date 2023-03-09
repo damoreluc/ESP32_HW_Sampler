@@ -4,6 +4,6 @@
 #include <Arduino.h>
 #include <userdatatypes/sampletype.h>
 
-void getSample(volatile Sample *sample);
+void getSample(volatile Sample *sample, uint32_t dt);
 
 #endif
