@@ -7,13 +7,13 @@
 // coda per il passaggio dei dati tra i due task
 
 // dimensione della coda
-static const uint8_t msgQueueLen = 20;
+static const uint8_t msgQueueLen = 40;
 // coda di comunicazione tra task, variabile globale
 static QueueHandle_t msg_queue;
 
 // impiego di un timer hardware per il periodo di campionamento
 // periodo di campionamento Ts = 200us
-uint32_t Ts_us = 200;
+uint32_t Ts_us = 500;
 
 // puntatore alla struttura timer da associare al timer hardware
 hw_timer_t *timer = NULL;
@@ -37,7 +37,15 @@ void printTask(void *parameters)
     // e in caso affermativo lo preleva (non bloccante)
     if (xQueueReceive(msg_queue, (void *)&item, 2) == pdTRUE)
     {
-      Serial.printf("%4d\t%4d\t%4d\t\t%3d\n", item.iax, item.iay, item.iaz, uxQueueSpacesAvailable(msg_queue));
+      Serial.printf("%3d\n", uxQueueSpacesAvailable(msg_queue));
+
+      // push data but do not perform immediate plotting
+      float t_ms = (float)item.timestamp/1000.0;
+
+      Serial.printf(">Ax:%.1f:%4d\n", t_ms, item.iax);
+      Serial.printf(">Ay:%.1f:%4d\n", t_ms, item.iay);
+      Serial.printf(">Az:%.1f:%4d\n", t_ms, item.iaz);
+
     }
   }
 }
@@ -55,7 +63,7 @@ void setup()
   xTaskCreatePinnedToCore(
       printTask,    // funzione da richiamare nel task
       "Print Task", // nome del task (etichetta utile per debug)
-      2000,         // dimensione in byte dello stack per le variabili locali del task (minimo 768 byte)
+      2500,         // dimensione in byte dello stack per le variabili locali del task (minimo 768 byte)
       NULL,         // puntatore agli eventuali parametri da passare al task
       1,            // priorità del task
       NULL,         // eventuale task handle per gestire il task da un altro task
@@ -81,8 +89,10 @@ void IRAM_ATTR onTimer()
 {
   Sample item;
   BaseType_t result;
+  static uint32_t t = 0;
 
   getSample(&item);
+  item.timestamp = t;
+  t += Ts_us;  
   result = xQueueSendFromISR(msg_queue, (void*)&item, NULL);
-
 }
