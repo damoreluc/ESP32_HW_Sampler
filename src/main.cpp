@@ -28,31 +28,44 @@ void IRAM_ATTR onTimer();
 volatile uint32_t indice = 0;
 
 // buffer payload udp
-char payload[60];
+char payload[200];
 
 // Implementazione dei task
 // task che attende un item nella coda e lo invia tramite UDP
 void printTask(void *parameters)
 {
   // variabile locale col dato prelevato dalla coda
-  Sample item;
+  Sample item1, item2, item3, item4;
 
   // invio pacchetto UDP
   while (1)
   {
-    // controlla se è presente un messaggio nella coda
-    // e in caso affermativo lo preleva (non bloccante)
-    if (xQueueReceive(msg_queue, (void *)&item, 2) == pdTRUE)
-    {
+    // controlla se sono presenti almeno due messaggi nella coda
+    // e in caso affermativo li preleva (non bloccante)
+    if(uxQueueMessagesWaiting(msg_queue) >= 4) {
+      xQueueReceive(msg_queue, (void *)&item1, 1);
+      xQueueReceive(msg_queue, (void *)&item2, 1);
+      xQueueReceive(msg_queue, (void *)&item3, 1);
+      xQueueReceive(msg_queue, (void *)&item4, 1);
+    //}
+    //if (xQueueReceive(msg_queue, (void *)&item, 2) == pdTRUE)
+    //{
       Serial.printf("%3d\n", uxQueueSpacesAvailable(msg_queue));
 
       // udp connesso?
       if (udp.connected())
       {
         // push data but do not perform immediate plotting
-        float t_ms = (float)item.timestamp / 1000.0;
+        float t1_ms = (float)item1.timestamp / 1000.0;
+        float t2_ms = (float)item2.timestamp / 1000.0;
+        float t3_ms = (float)item3.timestamp / 1000.0;
+        float t4_ms = (float)item4.timestamp / 1000.0;
         // invio UDP unicast
-        sprintf(payload, "Ax:%.1f:%4d\nAy:%.1f:%4d\nAz:%.1f:%4d\n", t_ms, item.iax, t_ms, item.iay, t_ms, item.iaz);
+        // myValue:1627551892444:1;1627551892555:2;1627551892666:3
+        sprintf(payload, "Ax:%.1f:%4d;%.1f:%4d;%.1f:%4d;%.1f:%4d\nAy:%.1f:%4d;%.1f:%4d;%.1f:%4d;%.1f:%4d\nAz:%.1f:%4d;%.1f:%4d;%.1f:%4d;%.1f:%4d\n", 
+        t1_ms, item1.iax, t2_ms, item2.iax, t3_ms, item3.iax, t4_ms, item4.iax,
+        t1_ms, item1.iay, t2_ms, item2.iay, t3_ms, item3.iay, t4_ms, item4.iay, 
+        t1_ms, item1.iaz, t2_ms, item2.iaz, t3_ms, item3.iaz, t4_ms, item4.iaz);
         Serial.println(strlen(payload));
         udp.print(payload);
       }
