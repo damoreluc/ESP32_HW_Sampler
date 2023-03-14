@@ -1,11 +1,15 @@
 #include <Arduino.h>
 #include <userdatatypes/sampletype.h>
 #include <acquisition/sampler.h>
+#include <wifi/parameters.h>
+#include <WiFi.h>
+#include <AsyncUDP.h>
 
 // ISR su APP_CPU (1)
-// trasmissione seriale su PRO_CPU(0)
-// coda per il passaggio dei dati tra i due task
+// trasmissione UDP su PRO_CPU(0)
+AsyncUDP udp;
 
+// coda per il passaggio dei dati tra i due task
 // dimensione della coda
 static const uint8_t msgQueueLen = 40;
 // coda di comunicazione tra task, variabile globale
@@ -23,14 +27,17 @@ void IRAM_ATTR onTimer();
 // indice nel buffer dati
 volatile uint32_t indice = 0;
 
+// buffer payload udp
+char payload[60];
+
 // Implementazione dei task
-// task che attende un item nella coda e lo stampa
+// task che attende un item nella coda e lo invia tramite UDP
 void printTask(void *parameters)
 {
   // variabile locale col dato prelevato dalla coda
   Sample item;
 
-  // stampa sul terminale
+  // invio pacchetto UDP
   while (1)
   {
     // controlla se è presente un messaggio nella coda
@@ -39,13 +46,16 @@ void printTask(void *parameters)
     {
       Serial.printf("%3d\n", uxQueueSpacesAvailable(msg_queue));
 
-      // push data but do not perform immediate plotting
-      float t_ms = (float)item.timestamp/1000.0;
-
-      Serial.printf(">Ax:%.1f:%4d\n", t_ms, item.iax);
-      Serial.printf(">Ay:%.1f:%4d\n", t_ms, item.iay);
-      Serial.printf(">Az:%.1f:%4d\n", t_ms, item.iaz);
-
+      // udp connesso?
+      if (udp.connected())
+      {
+        // push data but do not perform immediate plotting
+        float t_ms = (float)item.timestamp / 1000.0;
+        // invio UDP unicast
+        sprintf(payload, "Ax:%.1f:%4d\nAy:%.1f:%4d\nAz:%.1f:%4d\n", t_ms, item.iax, t_ms, item.iay, t_ms, item.iaz);
+        Serial.println(strlen(payload));
+        udp.print(payload);
+      }
     }
   }
 }
@@ -53,8 +63,22 @@ void printTask(void *parameters)
 void setup()
 {
   Serial.begin(921600);
-  Serial.printf("Sampler %d campioni con ISR e coda\n", msgQueueLen);
-    vTaskDelay(5000 / portTICK_PERIOD_MS);
+  Serial.printf("UDP Sampler %d campioni con ISR e coda\n", msgQueueLen);
+  WiFi.mode(WIFI_STA);
+  WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
+  if (WiFi.waitForConnectResult() != WL_CONNECTED)
+  {
+    Serial.println("WiFi Failed");
+    while (1)
+    {
+      vTaskDelay(1000 / portTICK_PERIOD_MS);
+    }
+  }
+  vTaskDelay(5000 / portTICK_PERIOD_MS);
+  if (udp.connect(IPAddress(192, 168, 0, 67), TELEPLOT_PORT))
+  {
+    Serial.println("UDP connected");
+  }
 
   // creazione della coda
   msg_queue = xQueueCreate(msgQueueLen, sizeof(Sample));
@@ -93,6 +117,6 @@ void IRAM_ATTR onTimer()
 
   getSample(&item);
   item.timestamp = t;
-  t += Ts_us;  
-  result = xQueueSendFromISR(msg_queue, (void*)&item, NULL);
+  t += Ts_us;
+  result = xQueueSendFromISR(msg_queue, (void *)&item, NULL);
 }
