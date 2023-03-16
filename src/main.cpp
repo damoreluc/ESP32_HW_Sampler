@@ -182,8 +182,9 @@ void setup()
     }
   }
   vTaskDelay(3000 / portTICK_PERIOD_MS);
-  // 192.168.0.67
-  if (udp.connect(IPAddress(192, 168, 0, 67), TELEPLOT_PORT))
+  // 192.168.0.67 casa
+  // 192.168.24.17 wifi scuola
+  if (udp.connect(IPAddress(192, 168, 24, 17), TELEPLOT_PORT))
   {
     Serial.println("UDP connected");
   }
