@@ -12,7 +12,7 @@ static const uint8_t msgQueueLen = 40;
 static QueueHandle_t msg_queue;
 
 // impiego di un timer hardware per il periodo di campionamento
-// periodo di campionamento Ts = 200us
+// periodo di campionamento Ts >= 254us
 uint32_t Ts_us = 500;
 
 // puntatore alla struttura timer da associare al timer hardware
@@ -52,6 +52,8 @@ void printTask(void *parameters)
 
 void setup()
 {
+  pinMode(GPIO_NUM_23, OUTPUT);
+
   Serial.begin(921600);
   Serial.printf("Sampler %d campioni con ISR e coda\n", msgQueueLen);
     vTaskDelay(5000 / portTICK_PERIOD_MS);

@@ -1,0 +1,88 @@
+Model:DS1074Z
+SN:DS1ZA154802717
+Manufacturer:RIGOL TECHNOLOGIES
+Board Ver:0.1.1
+Firmware Ver:0.2.2.5
+BOOT Ver:0.0.0.12
+CPLD Ver:1.1
+SoftWare Ver:00.02.01.SP1
+
+
+	DSO Vertical System 
+CH1:On
+Scale:1.000000V
+Position:-2.040000V
+Coupling:DC
+Bandwidth Limit:OFF
+Probe Ratio:10X
+Unit:V
+
+CH2:Off
+Scale:1.000000V
+Position:0.000000V
+Coupling:DC
+Bandwidth Limit:OFF
+Probe Ratio:10X
+Unit:V
+
+CH3:Off
+Scale:1.000000V
+Position:0.000000V
+Coupling:DC
+Bandwidth Limit:OFF
+Probe Ratio:10X
+Unit:V
+
+CH4:Off
+Scale:1.000000V
+Position:0.000000V
+Coupling:DC
+Bandwidth Limit:OFF
+Probe Ratio:10X
+Unit:V
+
+	DSO Horizontal System
+Delay:Off
+Time Mode:YT
+Time Scale:5.000000e-05S
+Delay Time Scale:5.000000e-07S
+Time Offset:1.008000e-04S
+Delay Time Offset:0.000000e+00S
+
+	DSO Acquire System
+Acquire Mode:Normal
+Memory Depth:600000
+Average Num:2
+Sampling Rate:1000000000Sa/S
+
+	DSO Trigger System
+Trigger Mode:Edge
+Trigger Source:CH1
+Trigger Edge Slope:Rising
+Trigger Sweep:Auto
+Trigger Coupling:DC
+Trigger Noise Reject:Off
+Trigger HoldOff:1.600000e-08S
+
+CH1 Level:1.380000V
+CH2 Level:0.000000V
+CH3 Level:0.000000V
+CH4 Level:0.000000V
+
+Pulse Condition:Positive More
+Pulse High Time:0.000002S
+Pulse Low Time:0.000001S
+
+Slope Condition:Positive More
+Slope High Time:0.000002S
+Slope Low Time:0.000001S
+Slope Win:Win Up
+Slope Level1:2.000000V
+Slope Level2:0.000000V
+
+Video Polarity:Positive
+Video Sync:All Lines
+Video Standard:NTSC
+Video Line:1
+
+
