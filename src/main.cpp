@@ -17,7 +17,7 @@ static QueueHandle_t msg_queue;
 
 // impiego di un timer hardware per il periodo di campionamento
 // periodo di campionamento Ts = 250us
-uint32_t Ts_us = 250;
+uint32_t Ts_us = 333;
 
 // puntatore alla struttura timer da associare al timer hardware
 hw_timer_t *timer = NULL;
@@ -169,6 +169,7 @@ void printTask(void *parameters)
 
 void setup()
 {
+  pinMode(GPIO_NUM_23, OUTPUT);
   Serial.begin(921600);
   Serial.printf("UDP Sampler %d campioni con ISR e coda\n", msgQueueLen);
   WiFi.mode(WIFI_STA);
