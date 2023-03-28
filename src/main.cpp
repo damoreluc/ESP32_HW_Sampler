@@ -20,9 +20,6 @@ hw_timer_t *timer = NULL;
 // dichiarazione della interrupt handling routine
 void IRAM_ATTR onTimer();
 
-// indice nel buffer dati
-volatile uint32_t indice = 0;
-
 // Implementazione dei task
 // task che attende un item nella coda e lo stampa
 void printTask(void *parameters)
@@ -40,12 +37,11 @@ void printTask(void *parameters)
       Serial.printf("%3d\n", uxQueueSpacesAvailable(msg_queue));
 
       // push data but do not perform immediate plotting
-      float t_ms = (float)item.timestamp/1000.0;
+      float t_ms = (float)item.timestamp / 1000.0;
 
       Serial.printf(">Ax:%.1f:%4d\n", t_ms, item.iax);
       Serial.printf(">Ay:%.1f:%4d\n", t_ms, item.iay);
       Serial.printf(">Az:%.1f:%4d\n", t_ms, item.iaz);
-
     }
   }
 }
@@ -56,7 +52,7 @@ void setup()
 
   Serial.begin(921600);
   Serial.printf("Sampler %d campioni con ISR e coda\n", msgQueueLen);
-    vTaskDelay(5000 / portTICK_PERIOD_MS);
+  vTaskDelay(5000 / portTICK_PERIOD_MS);
 
   // creazione della coda
   msg_queue = xQueueCreate(msgQueueLen, sizeof(Sample));
@@ -72,7 +68,8 @@ void setup()
       PRO_CPU_NUM   // core su cui far girare il task
   );
 
-  // impiego il timer hardware numero 0, con prescaler 80 (Tbit = 1us), conteggio in avanti
+  // impiego il timer hardware numero 0,
+  // con prescaler 80 (Tbit = 1us), conteggio in avanti (true)
   timer = timerBegin(0, 80, true);
   // associazione della ISR al timer per gestire l'interrupt periodico
   timerAttachInterrupt(timer, onTimer, true);
@@ -95,6 +92,6 @@ void IRAM_ATTR onTimer()
 
   getSample(&item);
   item.timestamp = t;
-  t += Ts_us;  
-  result = xQueueSendFromISR(msg_queue, (void*)&item, NULL);
+  t += Ts_us;
+//  result = xQueueSendFromISR(msg_queue, (void *)&item, NULL);
 }
